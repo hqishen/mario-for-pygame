@@ -15,7 +15,8 @@ class LoadScreen(tools.State):
         self.info_state = self.set_info_state()
         self.next = self.set_next_state()
         self.overhead_info = info.Info(self.game_info, self.info_state)
-        self.sound = Sound(self.state)
+        if self.mutex == False: #判断静音状态
+            self.sound = Sound(self.state)
 
     def set_next_state(self):
         return C.LEVEL

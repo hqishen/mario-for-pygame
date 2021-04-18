@@ -22,6 +22,13 @@ class Player(pygame.sprite.Sprite):
         self.image = self.right_frames[self.frame_index]
         self.rect = self.image.get_rect()
 
+        self.mutex = False #判断静音状态
+        with open('resources/text/flag', 'r') as f:
+            text = f.readline(10)
+            if text == "mutex":
+                self.mutex = True
+
+
     def restart(self):
         if self.dead:
             self.dead = False
@@ -201,9 +208,11 @@ class Player(pygame.sprite.Sprite):
         elif keys[tools.keybinding['jump']]:
             if self.allow_jump:
                 if self.big:
-                    setup.SOUNDS['big_jump'].play()
+                    if self.mutex != True:
+                        setup.SOUNDS['big_jump'].play()
                 else:
-                    setup.SOUNDS['small_jump'].play()
+                    if self.mutex != True:
+                        setup.SOUNDS['small_jump'].play()
                 self.state = C.JUMP
                 self.y_vel = self.jump_vel
 
@@ -278,9 +287,11 @@ class Player(pygame.sprite.Sprite):
         if keys[tools.keybinding['jump']]:
             if self.allow_jump:
                 if self.big:
-                    setup.SOUNDS['big_jump'].play()
+                    if self.mutex != True:
+                        setup.SOUNDS['big_jump'].play()
                 else:
-                    setup.SOUNDS['small_jump'].play()
+                    if self.mutex != True:
+                        setup.SOUNDS['small_jump'].play()
                 self.state = C.JUMP
                 if abs(self.x_vel) > 4:
                     self.y_vel = self.jump_vel - 0.5
@@ -372,7 +383,8 @@ class Player(pygame.sprite.Sprite):
 
     def shoot_fireball(self, fire_group):
         if self.current_time - self.last_fire_ball_timer > 500:
-            setup.SOUNDS['fireball'].play()
+            if self.mutex != True:
+                setup.SOUNDS['fireball'].play()
             self.allow_fireball = False #?
             fire_group.add(powerup.FireBall(self.rect.x, self.rect.y, self.facing_right))
             self.last_fire_ball_timer = self.current_time #?

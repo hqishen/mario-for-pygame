@@ -31,6 +31,13 @@ class Brick(Stuff):
         self.group = group
         self.name = name
 
+        self.mutex = False #添加静音的标志位，从文件读取相关的标志位然后设置声音播放
+        with open('resources/text/flag', 'r') as f:
+            text = f.readline(10)
+            if text == "mutex":
+                self.mutex = True
+
+
     def update(self, game_info):
         if self.state == C.BUMPED:
             self.bumped(game_info)
@@ -51,14 +58,16 @@ class Brick(Stuff):
 
             if self.type == C.TYPE_COIN:
                 if self.coin_num > 0:
-                    setup.SOUNDS['coin'].play()
+                    if self.mutex != True: #添加静音的标志位，从文件读取相关的标志位然后设置声音播放
+                        setup.SOUNDS['coin'].play()
                     self.group.add(Coin(self.rect.centerx, self.rect.y))
                     self.coin_num -= 1
                     self.state = C.RESTING
                 else:
                     self.state = C.OPENED
             elif self.type in [C.TYPE_MUSHROOM, C.TYPE_FIREFLOWER, C.TYPE_LIFEMUSHROOM, C.TYPE_STAR]:
-                setup.SOUNDS['powerup_appears'].play()
+                if self.mutex != True: #添加静音的标志位，从文件读取相关的标志位然后设置声音播放
+                    setup.SOUNDS['powerup_appears'].play()
                 self.group.add(create_powerup(self.rect.centerx, self.rect.y, self.type, game_info))
                 self.state = C.OPENED
             else:

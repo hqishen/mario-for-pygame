@@ -20,6 +20,7 @@ class State:
         self.finished = False
         self.next = None
         self.game_info = {}
+        self.mutex = False #添加静音标志位，默认是打开声音
 
     # 两个抽象方法
     @abstractmethod
@@ -64,7 +65,11 @@ class Game:
     def next_state(self):
         self.state_name = self.state.next
         game_info = self.state.cleanup()  # 感觉没啥用，直接self.state.finished = True 不就完事了？
+        mutex = self.state.mutex
         self.state = self.state_dict[self.state_name]
+        if self.state.mutex != mutex: #切换状态的时候，把当前的静音状态发送出去
+            self.state.mutex = mutex
+
         self.state.startup(self.current_time, game_info)
 
     def run(self):

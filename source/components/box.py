@@ -24,6 +24,12 @@ class Box(pygame.sprite.Sprite):
         self.type = data['type']
         self.group = group
         self.name = name
+        self.mutex = False #添加静音的标志位，从文件读取相关的标志位然后设置声音播放
+        with open('resources/text/flag', 'r') as f:
+            text = f.readline(10)
+            if text == "mutex":
+                self.mutex = True
+
 
     def load_frames(self):
         frame_rect_list = [(384, 0, 16, 16), (400, 0, 16, 16),
@@ -47,10 +53,12 @@ class Box(pygame.sprite.Sprite):
             self.rect.y = self.rest_height
             self.state = C.OPENED
             if self.type == C.TYPE_COIN:
-                setup.SOUNDS['coin'].play()
+                if self.mutex != True:
+                    setup.SOUNDS['coin'].play()
                 self.group.add(Coin(self.rect.centerx, self.rect.y)) # 一会处理
             else:
-                setup.SOUNDS['powerup_appears'].play()
+                if self.mutex != True:
+                    setup.SOUNDS['powerup_appears'].play()
                 self.group.add(create_powerup(self.rect.centerx, self.rect.y, self.type, game_info))
         self.frame_index = 4
         self.image = self.frames[self.frame_index]

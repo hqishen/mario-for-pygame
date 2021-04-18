@@ -21,7 +21,8 @@ class Level(tools.State):
         self.castle_timer = 0
         self.score_group = pygame.sprite.Group()
         self.overhead_info = info.Info(self.game_info, C.LEVEL)
-        self.sound = Sound(C.LEVEL)
+        if self.mutex == False:#判断静音状态
+            self.sound = Sound(C.LEVEL)
         self.load_map() # 导入某一关的地图JSON文件
         self.setup_background() # 读取具体的图片数据
         self.setup_maps() # 设置地图起始位置，玩家起始位置
@@ -226,7 +227,8 @@ class Level(tools.State):
             self.update_viewport()
             self.score_group.update()
             self.overhead_info.update(self.game_info)
-        self.sound.update(self.player, self.overhead_info.time)
+        if self.mutex == False:#判断静音状态
+            self.sound.update(self.player, self.overhead_info.time)
 
     def check_checkpoints(self):
         checkpoint = pygame.sprite.spritecollideany(self.player, self.checkpoint_group)
@@ -326,14 +328,16 @@ class Level(tools.State):
             if self.player.hurt_invincible:
                 pass
             elif self.player.invincible:
-                setup.SOUNDS['kick'].play()
+                if self.mutex == False:
+                    setup.SOUNDS['kick'].play()
                 self.update_score(100, enemy, 0)
                 self.enemy_group.remove(enemy)
                 self.dying_group.add(enemy)
                 direction = C.RIGHT if self.player.facing_right else C.LEFT
                 enemy.start_death_jump(direction)
             elif self.player.big:
-                setup.SOUNDS['pipe'].play()
+                if self.mutex == False:
+                    setup.SOUNDS['pipe'].play()
                 self.player.y_vel = -1 #?
                 self.player.state = C.BIG_TO_SMALL
                 self.game_info[C.POWERUP_LEVEL] = C.SMALL
@@ -342,11 +346,13 @@ class Level(tools.State):
                 self.death_timer = self.current_time
         elif powerup:
             if powerup.type == C.TYPE_MUSHROOM:
-                setup.SOUNDS['powerup'].play()
+                if self.mutex == False:
+                    setup.SOUNDS['powerup'].play()
                 self.player.state = C.SMALL_TO_BIG
                 self.game_info[C.POWERUP_LEVEL] = C.BIG
             elif powerup.type == C.TYPE_FIREFLOWER:
-                setup.SOUNDS['powerup'].play()
+                if self.mutex == False:
+                    setup.SOUNDS['powerup'].play()
                 if not self.player.big:
                     self.player.state = C.SMALL_TO_BIG
                 elif not self.player.fire:
@@ -355,7 +361,8 @@ class Level(tools.State):
             elif powerup.type == C.TYPE_STAR:
                 self.player.invincible = True
             elif powerup.type == C.TYPE_LIFEMUSHROOM:
-                setup.SOUNDS['one_up'].play()
+                if self.mutex == False:
+                    setup.SOUNDS['one_up'].play()
                 self.game_info[C.LIVES] += 1
             if powerup.type != C.TYPE_FIREBALL:
                 self.update_score(1000, powerup, 0)
@@ -365,7 +372,8 @@ class Level(tools.State):
                 if self.player.hurt_invincible:
                     pass
                 elif self.player.invincible:
-                    setup.SOUNDS['kick'].play()
+                    if self.mutex == False:
+                        setup.SOUNDS['kick'].play()
                     self.update_score(200, shell, 0)
                     self.shell_group.remove(shell)
                     self.dying_group.add(shell)
@@ -374,12 +382,14 @@ class Level(tools.State):
                 elif self.player.big:
                     self.player.y_vel = -1 #?
                     self.player.state = C.BIG_TO_SMALL
-                    setup.SOUNDS['pipe'].play()
+                    if self.mutex == False:
+                        setup.SOUNDS['pipe'].play()
                 else:
                     self.player.start_death_jump()
                     self.death_timer = self.current_time
             else:
-                setup.SOUNDS['kick'].play()
+                if self.mutex == False:
+                    setup.SOUNDS['kick'].play()
                 self.update_score(400, shell, 0)
                 if self.player.rect.x < shell.rect.x:
                     shell.x_vel = 10
@@ -391,7 +401,8 @@ class Level(tools.State):
                     shell.direction = C.LEFT
                 shell.state = C.SHELL_SLIDE
         elif coin:
-            setup.SOUNDS['coin'].play()
+            if self.mutex == False:
+                setup.SOUNDS['coin'].play()
             self.update_score(100, coin, 1)
             coin.kill()
 
@@ -419,7 +430,8 @@ class Level(tools.State):
                 enemy.start_death_jump(direction)
             elif self.player.y_vel > 0:
                 enemy.state = C.JUMPED_ON
-                setup.SOUNDS['stomp'].play()
+                if self.mutex == False:
+                    setup.SOUNDS['stomp'].play()
                 if enemy.name == C.GOOMBA:
                     self.update_score(100, enemy)
                     self.enemy_group.remove(enemy)
@@ -467,16 +479,19 @@ class Level(tools.State):
                     self.check_if_enemy_on(sprite)
                 if sprite.state == C.RESTING:
                     if self.player.big and sprite.type == C.TYPE_NONE:
-                        setup.SOUNDS['brick_smash'].play()
+                        if self.mutex == False:
+                            setup.SOUNDS['brick_smash'].play()
                         sprite.change_to_pieces(self.dying_group)
                     else:
-                        setup.SOUNDS['bump'].play()
+                        if self.mutex == False:
+                            setup.SOUNDS['bump'].play()
                         if sprite.type == C.TYPE_COIN:
                             self.update_score(200, sprite, 1)
                         sprite.start_bump()
             elif sprite.name == C.MAP_BOX:
                 if not sprite.state == C.OPENED:
-                    setup.SOUNDS['bump'].play()
+                    if self.mutex == False:
+                        setup.SOUNDS['bump'].play()
                     self.check_if_enemy_on(sprite)
                 if sprite.state == C.RESTING:
                     if sprite.type == C.TYPE_COIN:
@@ -533,7 +548,8 @@ class Level(tools.State):
         pipe = pygame.sprite.spritecollideany(self.player, self.pipe_group)
         if pipe and pipe.type == C.PIPE_TYPE_VERTICAL:
             if self.player.state == C.CROUCH and self.player.rect.x < pipe.rect.centerx and self.player.rect.right > pipe.rect.centerx:
-                setup.SOUNDS['pipe'].play()
+                if self.mutex == False:
+                    setup.SOUNDS['pipe'].play()
                 self.player.state = C.DOWN_TO_PIPE
         self.player.rect.y -= 1
 
